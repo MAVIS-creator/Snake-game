@@ -9,6 +9,7 @@ let level = 1;
 let speed = 150;
 let obstacles = [];
 let showLevelUp = false;
+let isPaused = false;
 
 // Load high score from localStorage
 let highScore = localStorage.getItem("snakeHighScore") || 0;
@@ -181,3 +182,19 @@ function gameLoop() {
 }
 
 let game = setInterval(gameLoop, speed);
+
+// Start button functionality
+document.getElementById("startBtn").addEventListener("click", function () {
+    if (isPaused) {
+        game = setInterval(gameLoop, speed);
+        isPaused = false;
+    }
+});
+
+// Pause button functionality
+document.getElementById("pauseBtn").addEventListener("click", function () {
+    if (!isPaused) {
+        clearInterval(game);
+        isPaused = true;
+    }
+});
