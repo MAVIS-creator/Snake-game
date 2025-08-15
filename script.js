@@ -195,6 +195,16 @@ function levelUpCheck() {
     }
 }
 
+// Image URLs (replace with your preferred images)
+const snakeHeadImg = new Image();
+snakeHeadImg.src = "https://img.icons8.com/color/48/000000/snake.png";
+
+const foodImg = new Image();
+foodImg.src = "https://img.icons8.com/color/48/000000/apple.png";
+
+const obstacleImg = new Image();
+obstacleImg.src = "https://img.icons8.com/color/48/000000/rock.png";
+
 // Initial setup (order matters!)
 generateObstacles(level);
 var food = randomFood();
