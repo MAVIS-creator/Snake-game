@@ -198,15 +198,15 @@ function levelUpCheck() {
     }
 }
 
-// Image URLs (replace with your preferred images)
+// Image URLs (snake head only, realistic stone obstacle)
 const snakeHeadImg = new Image();
-snakeHeadImg.src = "https://img.icons8.com/color/48/000000/snake.png";
+snakeHeadImg.src = "https://img.icons8.com/color/48/000000/snake-head.png";
 
 const foodImg = new Image();
 foodImg.src = "https://img.icons8.com/color/48/000000/apple.png";
 
 const obstacleImg = new Image();
-obstacleImg.src = "https://img.icons8.com/color/48/000000/rock.png";
+obstacleImg.src = "https://img.icons8.com/color/48/000000/stone.png";
 
 // Initial setup (order matters!)
 generateObstacles(level);
