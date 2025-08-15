@@ -3,8 +3,7 @@ const ctx = canvas.getContext("2d");
 
 let box = 20;
 let snake = [{ x: 9 * box, y: 10 * box }];
-let direction = "RIGHT"; // Set initial direction
-let food = randomFood();
+let direction = "RIGHT";
 let score = 0;
 let level = 1;
 let speed = 150;
@@ -15,6 +14,7 @@ let showLevelUp = false;
 let highScore = localStorage.getItem("snakeHighScore") || 0;
 document.getElementById("highScore").innerText = highScore;
 
+// Controls
 document.addEventListener("keydown", setDirection);
 
 function setDirection(e) {
@@ -31,7 +31,10 @@ function randomFood() {
             x: Math.floor(Math.random() * 20) * box,
             y: Math.floor(Math.random() * 20) * box
         };
-    } while (obstacles.some(o => o.x === position.x && o.y === position.y)); // avoid placing food on obstacles
+    } while (
+        obstacles.some(o => o.x === position.x && o.y === position.y) ||
+        snake.some(s => s.x === position.x && s.y === position.y)
+    );
     return position;
 }
 
@@ -39,15 +42,15 @@ function generateObstacles(level) {
     obstacles = [];
     if (level === 1) return;
 
-    let count = level * 2; // number of obstacles grows with level
+    let count = level * 2;
     for (let i = 0; i < count; i++) {
         let ox, oy;
         do {
             ox = Math.floor(Math.random() * 20) * box;
             oy = Math.floor(Math.random() * 20) * box;
         } while (
-            snake.some(s => s.x === ox && s.y === oy) || 
-            (ox === food.x && oy === food.y)
+            snake.some(s => s.x === ox && s.y === oy) ||
+            (ox === food?.x && oy === food?.y)
         );
         obstacles.push({ x: ox, y: oy });
     }
@@ -120,7 +123,6 @@ function update() {
 
     let newHead = { x: snakeX, y: snakeY };
 
-    // Game over conditions
     if (
         snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height ||
         collision(newHead, snake) ||
@@ -149,12 +151,33 @@ function render() {
     drawLevelUpBanner();
 }
 
-// Setup initial game state
-generateObstacles(level);
-food = randomFood();
-render(); // show initial frame
+function collision(head, array) {
+    return array.some(segment => segment.x === head.x && segment.y === head.y);
+}
 
-let game = setInterval(() => {
+function levelUpCheck() {
+    if (score % 5 === 0) {
+        level++;
+        showLevelUp = true;
+        generateObstacles(level);
+
+        setTimeout(() => {
+            showLevelUp = false;
+            speed = Math.max(50, speed - 20);
+            clearInterval(game);
+            game = setInterval(gameLoop, speed);
+        }, 1000);
+    }
+}
+
+// Initial setup (order matters!)
+generateObstacles(level);
+var food = randomFood();
+render(); // Show first frame immediately
+
+function gameLoop() {
     update();
     render();
-}, speed);
+}
+
+let game = setInterval(gameLoop, speed);
