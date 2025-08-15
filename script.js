@@ -103,18 +103,11 @@ function drawFood() {
 
 function drawObstacles() {
     obstacles.forEach(o => {
-        let gradient = ctx.createLinearGradient(
-            o.x, o.y, o.x + box, o.y + box
-        );
-        gradient.addColorStop(0, "#888");
-        gradient.addColorStop(1, "#222");
-        ctx.fillStyle = gradient;
-        ctx.strokeStyle = "#ff0";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(o.x, o.y, box, box, 4);
-        ctx.fill();
-        ctx.stroke();
+        ctx.save();
+        ctx.shadowColor = "#ff0";
+        ctx.shadowBlur = 8;
+        ctx.drawImage(obstacleImg, o.x, o.y, box, box);
+        ctx.restore();
     });
     ctx.lineWidth = 1;
     ctx.shadowBlur = 0;
