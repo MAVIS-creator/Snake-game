@@ -9,7 +9,7 @@ let level = 1;
 let speed = 150;
 let obstacles = [];
 let showLevelUp = false;
-let isPaused = false;
+let isPaused = true; // Start paused
 
 // Load high score from localStorage
 let highScore = localStorage.getItem("snakeHighScore") || 0;
@@ -181,7 +181,7 @@ function gameLoop() {
     render();
 }
 
-let game = setInterval(gameLoop, speed);
+let game = null; // Do not start interval yet
 
 // Start button functionality
 document.getElementById("startBtn").addEventListener("click", function () {
