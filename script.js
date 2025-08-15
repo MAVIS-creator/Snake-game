@@ -59,18 +59,27 @@ function generateObstacles(level) {
 
 function drawSnake() {
     for (let i = 0; i < snake.length; i++) {
-        let gradient = ctx.createLinearGradient(
-            snake[i].x, snake[i].y, snake[i].x + box, snake[i].y + box
-        );
-        gradient.addColorStop(0, "#0ff");
-        gradient.addColorStop(1, "#00aaff");
-        ctx.fillStyle = gradient;
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(snake[i].x, snake[i].y, box, box, 6);
-        ctx.fill();
-        ctx.stroke();
+        let x = snake[i].x, y = snake[i].y;
+        if (i === 0) {
+            // Draw snake head image
+            ctx.drawImage(snakeHeadImg, x, y, box, box);
+        } else {
+            // Glossy gradient for body
+            let gradient = ctx.createLinearGradient(x, y, x + box, y + box);
+            gradient.addColorStop(0, "#0ff");
+            gradient.addColorStop(0.5, "#00aaff");
+            gradient.addColorStop(1, "#004466");
+            ctx.shadowColor = "#0ff";
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = gradient;
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(x, y, box, box, 8);
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
     }
     ctx.lineWidth = 1;
 }
