@@ -352,14 +352,24 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
     document.getElementById("startBtn").addEventListener("click", () => {
       if (isPaused) {
         if (tipEl) tipEl.style.opacity = 0;
-        // reset if coming from game over
-        if (snake.length === 0 || snake[0].x < 0 || snake[0].y < 0 || snake[0].x >= N || snake[0].y >= N) {
-          snake = [{ x: 9, y: 10 }];
-          score = 0; level = 1; stepMs = baseSpeed;
-          generateObstacles(level);
-          food = randomFood();
-          scoreEl.textContent = score; levelEl.textContent = level;
-          drawSnake(); drawFood(); drawObstacles();
+        // Reset if coming from game over or initial state
+        if (
+            snake.length === 0 ||
+            snake[0].x < 0 || snake[0].y < 0 ||
+            snake[0].x >= N || snake[0].y >= N
+        ) {
+            snake = [{ x: 9, y: 10 }];
+            direction = "RIGHT";
+            score = 0;
+            level = 1;
+            stepMs = baseSpeed;
+            generateObstacles(level);
+            food = randomFood();
+            scoreEl.textContent = score;
+            levelEl.textContent = level;
+            drawSnake();
+            drawFood();
+            drawObstacles();
         }
         isPaused = false;
         lastStep = 0;
