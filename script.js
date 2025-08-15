@@ -31,23 +31,35 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
     // === HDR Environment (realistic reflections) ===
     // Poly Haven HDRI (small, CORS-friendly)
-    await new Promise((res, rej) => {
-      new RGBELoader()
-        .setDataType(THREE.UnsignedByteType)
-        .load(
-          "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
-          (hdr) => {
-            const pmrem = new THREE.PMREMGenerator(renderer);
-            const envMap = pmrem.fromEquirectangular(hdr).texture;
-            scene.environment = envMap;
-            hdr.dispose();
-            pmrem.dispose();
-            res();
-          },
-          undefined,
-          rej
-        );
-    });
+    try {
+      await new Promise((res, rej) => {
+        new RGBELoader()
+          .setDataType(THREE.UnsignedByteType)
+          .load(
+            "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+            (hdr) => {
+              try {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const envMap = pmrem.fromEquirectangular(hdr).texture;
+                scene.environment = envMap;
+                hdr.dispose();
+                pmrem.dispose();
+                console.log('HDR loaded and environment set');
+              } catch (e) {
+                console.warn('HDR loaded but environment setup failed', e);
+              }
+              res();
+            },
+            undefined,
+            (err) => {
+              console.warn('HDR load failed, continuing without env map', err);
+              res(); // resolve so script continues
+            }
+          );
+      });
+    } catch (e) {
+      console.error('Unexpected error during HDR load', e);
+    }
 
     // === Lights (cinematic) ===
     const ambient = new THREE.AmbientLight(0xbfefff, 0.35);
@@ -333,6 +345,7 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
         const dt = t - lastStep;
         if (dt >= stepMs) {
           lastStep = t;
+          console.log('step running', { t, stepMs, score, level });
           step();
         }
       }
@@ -350,29 +363,27 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
     // Start/Pause UI
     document.getElementById("startBtn").addEventListener("click", () => {
+      console.log('Start clicked', { isPaused, snakeLength: snake.length, snakeHead: snake[0] });
       if (isPaused) {
         if (tipEl) tipEl.style.opacity = 0;
-        // Reset if coming from game over or initial state
+        // reset if invalid head
         if (
-            snake.length === 0 ||
-            snake[0].x < 0 || snake[0].y < 0 ||
-            snake[0].x >= N || snake[0].y >= N
+          !snake.length ||
+          snake[0].x < 0 || snake[0].y < 0 ||
+          snake[0].x >= N || snake[0].y >= N
         ) {
-            snake = [{ x: 9, y: 10 }];
-            direction = "RIGHT";
-            score = 0;
-            level = 1;
-            stepMs = baseSpeed;
-            generateObstacles(level);
-            food = randomFood();
-            scoreEl.textContent = score;
-            levelEl.textContent = level;
-            drawSnake();
-            drawFood();
-            drawObstacles();
+          snake = [{ x: 9, y: 10 }];
+          direction = "RIGHT";
+          score = 0; level = 1; stepMs = baseSpeed;
+          generateObstacles(level);
+          food = randomFood();
+          scoreEl.textContent = score; levelEl.textContent = level;
+          drawSnake(); drawFood(); drawObstacles();
+          console.log('Reset game state for start');
         }
         isPaused = false;
         lastStep = 0;
+        console.log('Game resumed', { isPaused, lastStep });
       }
     });
     document.getElementById("pauseBtn").addEventListener("click", () => {
@@ -396,3 +407,6 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       composer.setSize(window.innerWidth, window.innerHeight);
       bloom.setSize(window.innerWidth, window.innerHeight);
     });
+
+    // debug: confirm script loaded
+    console.log('Snake3D script loaded');
