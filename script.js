@@ -1,222 +1,214 @@
-const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+// --- Three.js 3D Snake Game ---
 
-    let box = 20;
-    let snake = [{ x: 9 * box, y: 10 * box }];
-    let direction = "RIGHT";
-    let score = 0;
-    let level = 1;
-    let speed = 150;
-    let obstacles = [];
-    let showLevelUp = false;
-    let isPaused = true;
-    let food = null;
+// Scene setup
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x111111);
 
-    let highScore = localStorage.getItem("snakeHighScore") || 0;
-    document.getElementById("highScore").innerText = highScore;
+const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+camera.position.set(10, 18, 18);
+camera.lookAt(10, 0, 10);
 
-    document.addEventListener("keydown", setDirection);
-    function setDirection(e) {
-      if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-      else if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-      else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-      else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("gameCanvas") });
+renderer.setSize(500, 500);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x00ffff, 0.7);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+dirLight.position.set(10, 20, 10);
+scene.add(dirLight);
+
+// Game variables
+const boxSize = 1;
+let snake = [{ x: 9, y: 10 }];
+let direction = "RIGHT";
+let score = 0;
+let level = 1;
+let speed = 200;
+let obstacles = [];
+let food = null;
+let isPaused = true;
+let game = null;
+
+// Meshes
+let snakeMeshes = [];
+let foodMesh = null;
+let obstacleMeshes = [];
+
+// Materials
+const snakeHeadMat = new THREE.MeshPhongMaterial({ color: 0x00ff00, shininess: 80 });
+const snakeBodyMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 40 });
+const foodMat = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100 });
+const obstacleMat = new THREE.MeshPhongMaterial({ color: 0x888888, shininess: 10 });
+
+// Helpers
+function clearMeshes(meshArray) {
+    meshArray.forEach(m => scene.remove(m));
+    meshArray.length = 0;
+}
+function removeMesh(mesh) {
+    if (mesh) scene.remove(mesh);
+}
+
+// Draw snake
+function drawSnake() {
+    clearMeshes(snakeMeshes);
+    for (let i = 0; i < snake.length; i++) {
+        const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
+        const material = i === 0 ? snakeHeadMat : snakeBodyMat;
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(snake[i].x, 0.5, snake[i].y);
+        scene.add(mesh);
+        snakeMeshes.push(mesh);
     }
+}
 
-    function randomFood() {
-      let position;
-      do {
+// Draw food
+function drawFood() {
+    removeMesh(foodMesh);
+    const geometry = new THREE.SphereGeometry(boxSize / 2, 16, 16);
+    foodMesh = new THREE.Mesh(geometry, foodMat);
+    foodMesh.position.set(food.x, 0.5, food.y);
+    scene.add(foodMesh);
+}
+
+// Draw obstacles
+function drawObstacles() {
+    clearMeshes(obstacleMeshes);
+    obstacles.forEach(o => {
+        const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
+        const mesh = new THREE.Mesh(geometry, obstacleMat);
+        mesh.position.set(o.x, 0.5, o.y);
+        scene.add(mesh);
+        obstacleMeshes.push(mesh);
+    });
+}
+
+// Random food
+function randomFood() {
+    let position;
+    do {
         position = {
-          x: Math.floor(Math.random() * 20) * box,
-          y: Math.floor(Math.random() * 20) * box
+            x: Math.floor(Math.random() * 20),
+            y: Math.floor(Math.random() * 20)
         };
-      } while (
+    } while (
         obstacles.some(o => o.x === position.x && o.y === position.y) ||
         snake.some(s => s.x === position.x && s.y === position.y)
-      );
-      return position;
-    }
+    );
+    return position;
+}
 
-    function generateObstacles(level) {
-      obstacles = [];
-      if (level === 1) return;
-      let count = level * 2;
-      for (let i = 0; i < count; i++) {
+// Generate obstacles
+function generateObstacles(level) {
+    obstacles = [];
+    if (level === 1) return;
+    let count = level * 2;
+    for (let i = 0; i < count; i++) {
         let ox, oy;
         do {
-          ox = Math.floor(Math.random() * 20) * box;
-          oy = Math.floor(Math.random() * 20) * box;
+            ox = Math.floor(Math.random() * 20);
+            oy = Math.floor(Math.random() * 20);
         } while (
-          snake.some(s => s.x === ox && s.y === oy) ||
-          (ox === food?.x && oy === food?.y)
+            snake.some(s => s.x === ox && s.y === oy) ||
+            (ox === food?.x && oy === food?.y)
         );
         obstacles.push({ x: ox, y: oy });
-      }
     }
+}
 
-    function drawSnake() {
-      for (let i = 0; i < snake.length; i++) {
-        let x = snake[i].x, y = snake[i].y;
-        if (i === 0) {
-          ctx.drawImage(snakeHeadImg, x, y, box, box);
-        } else {
-          let gradient = ctx.createLinearGradient(x, y, x + box, y + box);
-          gradient.addColorStop(0, "#0ff");
-          gradient.addColorStop(0.5, "#00aaff");
-          gradient.addColorStop(1, "#004466");
-          ctx.shadowColor = "#0ff";
-          ctx.shadowBlur = 10;
-          ctx.fillStyle = gradient;
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.roundRect(x, y, box, box, 8);
-          ctx.fill();
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-        }
-      }
-      ctx.lineWidth = 1;
-    }
+// Collision
+function collision(head, array) {
+    return array.some(segment => segment.x === head.x && segment.y === head.y);
+}
 
-    function drawFood() {
-      ctx.drawImage(foodImg, food.x, food.y, box, box);
-    }
+// Update logic
+function update() {
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
 
-    function drawObstacles() {
-      obstacles.forEach(o => {
-        ctx.save();
-        ctx.shadowColor = "#ff0";
-        ctx.shadowBlur = 8;
-        ctx.drawImage(obstacleImg, o.x, o.y, box, box);
-        ctx.restore();
-      });
-      ctx.lineWidth = 1;
-      ctx.shadowBlur = 0;
-    }
+    if (direction === "LEFT") snakeX -= 1;
+    if (direction === "UP") snakeY -= 1;
+    if (direction === "RIGHT") snakeX += 1;
+    if (direction === "DOWN") snakeY += 1;
 
-    function drawLevelUpBanner() {
-      if (!showLevelUp) return;
-      ctx.font = "bold 40px Orbitron";
-      ctx.fillStyle = "#0ff";
-      ctx.textAlign = "center";
-      ctx.shadowColor = "#0ff";
-      ctx.shadowBlur = 20;
-      ctx.fillText(`LEVEL ${level}`, canvas.width / 2, canvas.height / 2);
-      ctx.shadowBlur = 0;
-    }
-
-    function update() {
-      let snakeX = snake[0].x;
-      let snakeY = snake[0].y;
-
-      if (direction === "LEFT") snakeX -= box;
-      if (direction === "UP") snakeY -= box;
-      if (direction === "RIGHT") snakeX += box;
-      if (direction === "DOWN") snakeY += box;
-
-      if (snakeX === food.x && snakeY === food.y) {
+    if (snakeX === food.x && snakeY === food.y) {
         score++;
-        if (score > highScore) {
-          highScore = score;
-          localStorage.setItem("snakeHighScore", highScore);
-          document.getElementById("highScore").innerText = highScore;
-        }
         food = randomFood();
         levelUpCheck();
-      } else {
+    } else {
         snake.pop();
-      }
+    }
 
-      let newHead = { x: snakeX, y: snakeY };
+    let newHead = { x: snakeX, y: snakeY };
 
-      if (
-        snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height ||
+    if (
+        snakeX < 0 || snakeY < 0 || snakeX >= 20 || snakeY >= 20 ||
         collision(newHead, snake) ||
         collision(newHead, obstacles)
-      ) {
+    ) {
         clearInterval(game);
         alert("Game Over! Final Score: " + score);
+        isPaused = true;
         return;
-      }
-
-      snake.unshift(newHead);
-      document.getElementById("score").innerText = score;
-      document.getElementById("level").innerText = level;
     }
 
-    function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawSnake();
-      drawFood();
-      drawObstacles();
-      drawLevelUpBanner();
-    }
+    snake.unshift(newHead);
+    document.getElementById("score").innerText = score;
+    document.getElementById("level").innerText = level;
+}
 
-    function collision(head, array) {
-      return array.some(segment => segment.x === head.x && segment.y === head.y);
-    }
+// Render logic
+function render() {
+    drawSnake();
+    drawFood();
+    drawObstacles();
+    renderer.render(scene, camera);
+}
 
-    function levelUpCheck() {
-      if (score % 5 === 0) {
+// Level up
+function levelUpCheck() {
+    if (score % 5 === 0) {
         level++;
-        showLevelUp = true;
         generateObstacles(level);
         clearInterval(game);
         setTimeout(() => {
-          showLevelUp = false;
-          speed = Math.max(50, speed - 20);
-          game = setInterval(gameLoop, speed);
-          isPaused = false;
+            speed = Math.max(50, speed - 20);
+            game = setInterval(gameLoop, speed);
+            isPaused = false;
         }, 1000);
-      }
     }
+}
 
-    // Image preload
-    const snakeHeadImg = new Image();
-snakeHeadImg.src = "https://static.thenounproject.com/png/snake-head-icon-2145950-512.png"; // refined snake head icon
+// Controls
+document.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+    else if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+    else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+    else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+});
 
-const foodImg = new Image();
-foodImg.src = "https://purepng.com/pub/media/catalog/product/cache/4a504e75fc2113e11699b229adee9f87/r/e/red-apple.png"; // crisp HD red apple
+// Game loop
+function gameLoop() {
+    update();
+    render();
+}
 
-const obstacleImg = new Image();
-obstacleImg.src = "https://clipartmax.com/png/full/435-4356919_viper-snake-head-logo-snake-head-logo-png.png"; // solid obstacle image
-
-
-    function preloadImages(images, callback) {
-      let loaded = 0;
-      let total = images.length;
-      images.forEach(img => {
-        img.onload = () => {
-          loaded++;
-          if (loaded === total) callback();
-        };
-      });
-    }
-
-    preloadImages([snakeHeadImg, foodImg, obstacleImg], () => {
-      generateObstacles(level);
-      food = randomFood();
-      render();
-    });
-
-    function gameLoop() {
-      update();
-      render();
-    }
-
-    let game = null;
-
-    document.getElementById("startBtn").addEventListener("click", function () {
-      if (isPaused) {
+// Start/Pause buttons
+document.getElementById("startBtn").addEventListener("click", function () {
+    if (isPaused) {
         game = setInterval(gameLoop, speed);
         isPaused = false;
-      }
-    });
-
-    document.getElementById("pauseBtn").addEventListener("click", function () {
-      if (!isPaused) {
+    }
+});
+document.getElementById("pauseBtn").addEventListener("click", function () {
+    if (!isPaused) {
         clearInterval(game);
         isPaused = true;
-      }
-    });
+    }
+});
+
+// Initial setup
+generateObstacles(level);
+food = randomFood();
+render();
