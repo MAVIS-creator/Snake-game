@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snake: Levels Edition</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <title>Snake 3D — Deluxe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="game-wrapper">
-    <h1 class="game-title">Snake<span>Levels Edition</span></h1>
-    <div class="score-panel">
-        <div class="score-box">Score: <span id="score">0</span></div>
-        <div class="score-box">Level: <span id="level">1</span></div>
-        <div class="score-box">High Score: <span id="highScore">0</span></div>
+  <canvas id="gameCanvas"></canvas>
+  <div id="ui">
+    <div class="topbar">
+      <div class="pill brand">SNAKE • 3D</div>
+      <div class="pill stat">Score: <span id="score">0</span></div>
+      <div class="pill stat">Level: <span id="level">1</span></div>
+      <div class="pill stat">High Score: <span id="highScore">0</span></div>
+      <div class="pill controls">
+        <button class="btn pill" id="startBtn">Start</button>
+        <button class="btn pill" id="pauseBtn">Pause</button>
+      </div>
     </div>
-    <div class="controls-panel">
-        <button id="startBtn" class="game-btn">Start</button>
-        <button id="pauseBtn" class="game-btn">Pause</button>
+    <div></div>
+    <div class="centerTip" id="tip">
+      <h1>Press Start</h1>
+      <p>Use Arrow Keys • Eat the glowing orb • Avoid yourself & obstacles</p>
     </div>
-    <canvas id="gameCanvas"></canvas>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-<script src="script.js"></script>
+  </div>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
