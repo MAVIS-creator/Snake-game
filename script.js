@@ -185,11 +185,12 @@ function levelUpCheck() {
         showLevelUp = true;
         generateObstacles(level);
 
+        // Pause the game for 1 second to show the banner
+        clearInterval(game);
         setTimeout(() => {
             showLevelUp = false;
             speed = Math.max(50, speed - 20);
-            clearInterval(game);
-            game = setInterval(gameLoop, speed);
+            game = setInterval(gameLoop, speed); // Resume game automatically
         }, 1000);
     }
 }
