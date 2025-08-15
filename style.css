@@ -1,0 +1,47 @@
+body {
+    background: radial-gradient(circle at center, #111 0%, #000 100%);
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.game-title {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    letter-spacing: 3px;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0aa;
+}
+
+.game-title span {
+    display: block;
+    font-size: 1rem;
+    color: #aaa;
+}
+
+.score-panel {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.score-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 10px rgba(0,255,255,0.3);
+}
+
+#gameCanvas {
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid rgba(0,255,255,0.4);
+    box-shadow: 0 0 15px #0ff, 0 0 30px #0aa;
+}
