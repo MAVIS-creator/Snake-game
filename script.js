@@ -174,13 +174,14 @@ const canvas = document.getElementById("gameCanvas");
 
     // Image preload
     const snakeHeadImg = new Image();
-    snakeHeadImg.src = "https://upload.wikimedia.org/wikipedia/commons/0/05/Cartoon_snake_head.png";
+snakeHeadImg.src = "https://static.thenounproject.com/png/snake-head-icon-2145950-512.png"; // refined snake head icon
 
-    const foodImg = new Image();
-    foodImg.src = "https://purepng.com/public/uploads/large/purepng.com-red-appleapplefruithealthyred-apple-981524754223syv3f.png";
+const foodImg = new Image();
+foodImg.src = "https://purepng.com/pub/media/catalog/product/cache/4a504e75fc2113e11699b229adee9f87/r/e/red-apple.png"; // crisp HD red apple
 
-    const obstacleImg = new Image();
-    obstacleImg.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Stone_icon.png/512px-Stone_icon.png";
+const obstacleImg = new Image();
+obstacleImg.src = "https://clipartmax.com/png/full/435-4356919_viper-snake-head-logo-snake-head-logo-png.png"; // solid obstacle image
+
 
     function preloadImages(images, callback) {
       let loaded = 0;
