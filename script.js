@@ -193,6 +193,7 @@ function levelUpCheck() {
             showLevelUp = false;
             speed = Math.max(50, speed - 20);
             game = setInterval(gameLoop, speed); // Resume game automatically
+            isPaused = false; // <-- Fix: ensure game is unpaused after level up
         }, 1000);
     }
 }
