@@ -59,32 +59,55 @@ function generateObstacles(level) {
 
 function drawSnake() {
     for (let i = 0; i < snake.length; i++) {
-        let gradient = ctx.createLinearGradient(snake[i].x, snake[i].y, snake[i].x + box, snake[i].y + box);
+        let gradient = ctx.createLinearGradient(
+            snake[i].x, snake[i].y, snake[i].x + box, snake[i].y + box
+        );
         gradient.addColorStop(0, "#0ff");
-        gradient.addColorStop(1, "#0aa");
+        gradient.addColorStop(1, "#00aaff");
         ctx.fillStyle = gradient;
-        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(snake[i].x, snake[i].y, box, box, 6);
+        ctx.fill();
+        ctx.stroke();
     }
+    ctx.lineWidth = 1;
 }
 
 function drawFood() {
-    let gradient = ctx.createRadialGradient(food.x + 10, food.y + 10, 2, food.x + 10, food.y + 10, 10);
-    gradient.addColorStop(0, "#f00");
+    let gradient = ctx.createRadialGradient(
+        food.x + box / 2, food.y + box / 2, 2,
+        food.x + box / 2, food.y + box / 2, box / 2
+    );
+    gradient.addColorStop(0, "#ff0");
+    gradient.addColorStop(0.5, "#f00");
     gradient.addColorStop(1, "rgba(255,0,0,0)");
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(food.x + 10, food.y + 10, 10, 0, Math.PI * 2);
+    ctx.arc(food.x + box / 2, food.y + box / 2, box / 2, 0, Math.PI * 2);
+    ctx.shadowColor = "#f00";
+    ctx.shadowBlur = 15;
     ctx.fill();
+    ctx.shadowBlur = 0;
 }
 
 function drawObstacles() {
-    ctx.fillStyle = "#ff0";
     obstacles.forEach(o => {
+        let gradient = ctx.createLinearGradient(
+            o.x, o.y, o.x + box, o.y + box
+        );
+        gradient.addColorStop(0, "#888");
+        gradient.addColorStop(1, "#222");
+        ctx.fillStyle = gradient;
         ctx.strokeStyle = "#ff0";
-        ctx.shadowColor = "#ff0";
-        ctx.shadowBlur = 10;
-        ctx.fillRect(o.x, o.y, box, box);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(o.x, o.y, box, box, 4);
+        ctx.fill();
+        ctx.stroke();
     });
+    ctx.lineWidth = 1;
     ctx.shadowBlur = 0;
 }
 
