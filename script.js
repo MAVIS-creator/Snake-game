@@ -95,12 +95,35 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
     grid.position.set(10, 0.002, 10); // Center the grid
     scene.add(grid);
 
-    // Optional: Add a border (thin box)
-    const borderGeometry = new THREE.BoxGeometry(20, 0.1, 20);
-    const borderMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
-    const borderMesh = new THREE.Mesh(borderGeometry, borderMaterial);
-    borderMesh.position.set(10, 0.05, 10);
+    // Tron-style glowing arena
+    const borderSize = 20;  // Arena size
+    const borderHeight = 2; // Frame height
+
+    // Create the edges geometry (wireframe outline)
+    const edges = new THREE.EdgesGeometry(
+        new THREE.BoxGeometry(borderSize, borderHeight, borderSize)
+    );
+
+    // Neon material
+    const borderMaterial = new THREE.LineBasicMaterial({
+        color: 0x00ffff,  // Bright cyan
+        linewidth: 2
+    });
+
+    const borderMesh = new THREE.LineSegments(edges, borderMaterial);
+    borderMesh.position.set(borderSize / 2, borderHeight / 2, borderSize / 2);
     scene.add(borderMesh);
+
+    // Add a glow effect using a slightly bigger transparent box
+    const glowGeometry = new THREE.BoxGeometry(borderSize * 1.02, borderHeight, borderSize * 1.02);
+    const glowMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00ffff,
+        transparent: true,
+        opacity: 0.08
+    });
+    const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+    glowMesh.position.copy(borderMesh.position);
+    scene.add(glowMesh);
 
     // === Game State ===
     const N = 20;              // grid size
