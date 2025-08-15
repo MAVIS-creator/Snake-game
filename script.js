@@ -1,4 +1,4 @@
- import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
     import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
     import { EffectComposer } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js";
     import { RenderPass } from "https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js";
@@ -92,8 +92,15 @@
     const grid = new THREE.GridHelper(20, 20, 0x00ffff, 0x004455);
     grid.material.opacity = 0.25;
     grid.material.transparent = true;
-    grid.position.set(10, 0.002, 10);
+    grid.position.set(10, 0.002, 10); // Center the grid
     scene.add(grid);
+
+    // Optional: Add a border (thin box)
+    const borderGeometry = new THREE.BoxGeometry(20, 0.1, 20);
+    const borderMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
+    const borderMesh = new THREE.Mesh(borderGeometry, borderMaterial);
+    borderMesh.position.set(10, 0.05, 10);
+    scene.add(borderMesh);
 
     // === Game State ===
     const N = 20;              // grid size
